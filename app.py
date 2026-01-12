@@ -11,10 +11,10 @@ from scipy.stats import linregress
 import time
 
 # ============================================
-# 0. 系統設定 & CSS (隱形斗篷 + RWD 自適應字體)
+# 0. 系統設定 & CSS (全端制霸 RWD 版)
 # ============================================
 st.set_page_config(
-    page_title="Phoenix V104 隱形自適應版",
+    page_title="Phoenix V106 全端制霸",
     page_icon="🦅",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -23,91 +23,81 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* ====================================================================
-       1. 【隱形斗篷】核心代碼：徹底移除右下角身分標記
+       1. 【絕對隱私】移除所有 Streamlit 標記與頭像
        ==================================================================== */
-    
-    /* 隱藏 Streamlit 右下角的 Viewer Badge (顯示帳號/公司名的那個) */
-    div[class*="viewerBadge"] { display: none !important; }
     .viewerBadge_container__1QSob { display: none !important; }
-    
-    /* 隱藏右上角漢堡選單、頂部彩條、底部 Footer */
+    div[data-testid="stStatusWidget"] { display: none !important; }
+    div[class*="viewerBadge"] { display: none !important; }
     #MainMenu { visibility: hidden !important; }
     header { visibility: hidden !important; }
     footer { visibility: hidden !important; }
-    [data-testid="stStatusWidget"] { visibility: hidden !important; }
     
     /* ====================================================================
-       2. 【RWD 自適應字體】依據螢幕寬度自動調整大小
+       2. 【RWD 智慧排版】針對不同裝置給予最佳體驗
        ==================================================================== */
     
-    /* 預設 (手機或小視窗): 字體適中，不會爆版 */
-    html, body, [class*="css"] {
-        font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
-        font-size: 18px !important; 
-        font-weight: bold !important;
-    }
-    h1 { font-size: 36px !important; }
-    h2 { font-size: 28px !important; }
-    h3 { font-size: 24px !important; }
-    .stMetricValue { font-size: 40px !important; }
-
-    /* 平板/筆電 (寬度 > 768px): 字體稍微放大 */
-    @media (min-width: 768px) {
+    /* --- 手機版 (螢幕寬度 < 768px) --- */
+    @media only screen and (max-width: 767px) {
         html, body, [class*="css"] {
-            font-size: 22px !important; 
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
+            font-size: 16px !important; /* 手機字體回歸正常，避免爆版 */
         }
-        h1 { font-size: 48px !important; }
-        h2 { font-size: 36px !important; }
-        h3 { font-size: 30px !important; }
-        .stMetricValue { font-size: 50px !important; }
+        h1 { font-size: 28px !important; margin-bottom: 15px !important; }
+        h2 { font-size: 24px !important; margin-top: 20px !important; }
+        h3 { font-size: 20px !important; }
         
-        /* 表格字體 */
-        div[data-testid="stDataFrame"] div[data-testid="stTable"], 
+        .stMetricValue { font-size: 36px !important; } /* 數據指標適中 */
+        
+        /* 手機版輸入框不需要太高 */
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stTextInput div[data-baseweb="input"] > div {
+            min-height: 45px !important;
+        }
+        
+        /* 表格字體縮小以容納更多欄位 */
         div[data-testid="stDataFrame"] td, 
         div[data-testid="stDataFrame"] th {
-            font-size: 22px !important;
+            font-size: 14px !important;
         }
     }
 
-    /* 大型桌機/大螢幕 (寬度 > 1200px): 字體加大 (你的老花眼模式) */
-    @media (min-width: 1200px) {
+    /* --- 桌機版 (螢幕寬度 >= 768px) --- */
+    @media only screen and (min-width: 768px) {
         html, body, [class*="css"] {
-            font-size: 28px !important; 
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
+            font-size: 24px !important; /* 桌機維持大字體，清晰舒適 */
+            font-weight: bold !important;
         }
-        h1 { font-size: 60px !important; }
-        h2 { font-size: 48px !important; }
-        h3 { font-size: 36px !important; }
-        .stMetricValue { font-size: 64px !important; }
+        h1 { font-size: 56px !important; margin-bottom: 25px !important; }
+        h2 { font-size: 42px !important; margin-top: 35px !important; }
+        h3 { font-size: 32px !important; }
         
-        /* 表格字體特大 */
-        div[data-testid="stDataFrame"] div[data-testid="stTable"], 
-        div[data-testid="stDataFrame"] td, 
-        div[data-testid="stDataFrame"] th {
-            font-size: 28px !important;
-            padding: 12px !important;
-        }
+        .stMetricValue { font-size: 60px !important; font-weight: 900 !important; }
         
-        /* 輸入框高度撐開 */
+        /* 桌機版輸入框拉高，方便點擊 */
         .stSelectbox div[data-baseweb="select"] > div,
         .stTextInput div[data-baseweb="input"] > div {
             min-height: 60px !important;
         }
+        
+        .stSelectbox div[data-baseweb="select"] span {
+            font-size: 26px !important;
+        }
+        
+        /* 表格維持大字體 */
+        div[data-testid="stDataFrame"] td, 
+        div[data-testid="stDataFrame"] th {
+            font-size: 24px !important;
+            padding: 12px !important;
+        }
     }
 
     /* ====================================================================
-       3. 通用元件優化
+       3. 通用元件優化 (不分裝置)
        ==================================================================== */
-    .modebar { display: none !important; }
+    .modebar { display: none !important; } /* 隱藏 Plotly 工具列 */
     
-    /* 輸入框通用設定 */
-    .stSelectbox div[data-baseweb="select"] > div,
-    .stTextInput div[data-baseweb="input"] > div,
-    .stNumberInput div[data-baseweb="input"] > div {
-        display: flex !important;
-        align-items: center !important;
-    }
-    
-    /* 自訂大字體數據卡片 (也會隨 RWD 縮放) */
+    /* 數據卡片樣式 */
     .big-metric-box {
         background-color: #f8f9fa;
         border-left: 10px solid #DC3545;
@@ -115,6 +105,19 @@ st.markdown("""
         margin: 15px 0;
         border-radius: 12px;
         box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    /* 讓表格內容靠右對齊 (數字較好讀) */
+    div[data-testid="stDataFrame"] td {
+        text-align: right !important;
+    }
+    
+    /* 修復輸入框垂直置中 */
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stTextInput div[data-baseweb="input"] > div,
+    .stNumberInput div[data-baseweb="input"] > div {
+        display: flex !important;
+        align-items: center !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -306,22 +309,25 @@ def plot_bar_chart(data, x_col, y_col, title, color_code, avg_col=None):
     if avg_col and avg_col in data.columns:
          data['Label'] = data['Label'] + " ($" + data[avg_col].round(1).astype(str) + ")"
 
-    fig = px.bar(data, x=x_col, y=y_col, orientation='h', text='Label', title=title)
+    # 設定 labels 參數將欄位名稱中文化
+    fig = px.bar(data, x=x_col, y=y_col, orientation='h', text='Label', title=title,
+                 labels={x_col: "淨買賣(張)", y_col: "券商"})
     
-    # 圖表字體大小設定 (這裡我們給一個相對大的預設值，讓它在大螢幕清楚，手機上 Plotly 會自動縮放一些)
+    # 【重點優化】圖表版面 RWD 設定
+    # 這裡的設定是「最大值」，在手機上 Plotly 會自動縮放，但我們要把 Margin 留夠
     fig.update_layout(
         yaxis={'categoryorder':'total ascending', 'title':None, 'tickfont':{'size':20, 'color':'black', 'family': 'Microsoft JhengHei'}}, 
         xaxis={'title':"", 'showticklabels': False}, 
-        margin=dict(r=150, l=120, t=80, b=50), 
+        margin=dict(r=100, l=120, t=80, b=50), # 縮小右邊距，避免手機上太擠
         height=850, 
         title_font=dict(size=30, family="Microsoft JhengHei", color='black'),
-        hoverlabel=dict(font_size=24, font_family="Microsoft JhengHei", bgcolor="white") 
+        hoverlabel=dict(font_size=20, font_family="Microsoft JhengHei", bgcolor="white") 
     )
     
     fig.update_traces(
         marker_color=color_code, 
         textposition='outside', 
-        textfont=dict(size=24, color='black', family="Arial Black"), 
+        textfont=dict(size=22, color='black', family="Arial Black"), 
         cliponaxis=False, 
         hovertemplate="<b>%{y}</b><br>數據: %{x:.1f}<extra></extra>"
     )
@@ -372,7 +378,6 @@ def view_dashboard():
     
     user_price = st.number_input("請輸入今日收盤價", value=100.0)
 
-    # 數據卡片顯示
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
         color = "#28A745" if power_score > 60 else ("#DC3545" if power_score < 40 else "#FFC107")
@@ -422,7 +427,6 @@ def view_dashboard():
                 t_bk = st.selectbox("選擇券商", all_bks)
                 bk_detail_raw = df_detail[df_detail['Broker'] == t_bk].copy()
                 if not bk_detail_raw.empty:
-                    # 計算總結數據
                     t_buy = bk_detail_raw['Buy'].sum()
                     t_sell = bk_detail_raw['Sell'].sum()
                     t_net = t_buy - t_sell
@@ -441,7 +445,6 @@ def view_dashboard():
 
     st.markdown("---")
     cc1, cc2 = st.columns(2)
-    # Top 20 邏輯
     N_TOP = 20
     
     with cc1:
@@ -558,7 +561,6 @@ def view_chip_structure():
         target_v['Net_Zhang'] = target_v['Net'] / 1000
         target_v['Tier'] = target_v['Net'].apply(get_tier)
         
-        # 視覺權重平衡：放大中實戶
         def weight_boost(row):
             if "超級大戶" in row['Tier']: return row['AbsNet'] * 1.0  
             if "大戶" in row['Tier']: return row['AbsNet'] * 1.0      
@@ -569,9 +571,11 @@ def view_chip_structure():
 
         custom_scale = [[0.0, 'green'], [0.5, 'white'], [1.0, 'red']]
         max_val = max(abs(target_v['Net_Zhang'].min()), abs(target_v['Net_Zhang'].max()))
+        
         fig_v = px.treemap(target_v, path=[px.Constant("全市場"), 'Tier', 'Broker'], values='W_Size',
                            color='Net_Zhang', color_continuous_scale=custom_scale, range_color=[-max_val, max_val],
-                           title=f"{v_opt} 主力領土 (加權平衡顯示)")
+                           title=f"{v_opt} 主力領土 (加權平衡顯示)",
+                           labels={'Net_Zhang': '淨買賣(張)'})
         
         fig_v.update_traces(textfont=dict(size=24), hovertemplate='<b>%{label}</b><br>淨量: %{color:.1f} 張')
         fig_v.update_layout(hoverlabel=dict(font_size=24, font_family="Microsoft JhengHei", bgcolor="white"))
@@ -638,7 +642,8 @@ def view_hunter_radar():
         
         fig_g = px.bar(gang_stats, x='Net_Zhang', y='Gang', orientation='h', text_auto='.1f', 
                        title="幫派淨買賣", color='Net_Zhang', color_continuous_scale='RdYlGn', 
-                       custom_data=['Info']) 
+                       custom_data=['Info'],
+                       labels={'Net_Zhang': '淨買賣(張)', 'Gang': '幫派分類'}) 
         
         fig_g.update_traces(
             textfont=dict(size=24),
@@ -866,8 +871,8 @@ def view_batch_import():
 # ============================================
 def main():
     with st.sidebar:
-        st.title("🦅 Phoenix V104")
-        st.caption("隱形自適應版")
+        st.title("🦅 Phoenix V106")
+        st.caption("全端制霸版")
         st.markdown("---")
         choice = st.radio("功能選單", ["🏠 總司令儀表板", "🧠 AI 戰略實驗室", "📈 趨勢戰情室", "🔍 獵殺雷達", "📉 籌碼斷層", "🕵️‍♂️ 分點偵探", "🏆 贏家與韭菜名人堂", "📂 資料管理後台"])
     
