@@ -11,10 +11,10 @@ from scipy.stats import linregress
 import time
 
 # ============================================
-# 0. 系統設定 & CSS (隱形斗篷 + RWD 自適應字體)
+# 0. 系統設定 & CSS (V108: 繼承 V107 的完美 RWD 與隱私)
 # ============================================
 st.set_page_config(
-    page_title="Phoenix V104 隱形自適應版",
+    page_title="Phoenix V108 除錯淨化版",
     page_icon="🦅",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -23,94 +23,90 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* ====================================================================
-       1. 【隱形斗篷】核心代碼：徹底移除右下角身分標記
+       1. 手機導航按鈕修復 (保留左上角，隱藏右上角)
        ==================================================================== */
-    
-    /* 隱藏 Streamlit 右下角的 Viewer Badge (顯示帳號/公司名的那個) */
-    div[class*="viewerBadge"] { display: none !important; }
+    div[data-testid="stToolbar"] { 
+        visibility: hidden !important; 
+        display: none !important;
+    }
+    div[data-testid="stDecoration"] { 
+        visibility: hidden !important; 
+        display: none !important;
+    }
+
+    /* ====================================================================
+       2. 絕對隱私 (隱藏 Viewer Badge)
+       ==================================================================== */
     .viewerBadge_container__1QSob { display: none !important; }
-    
-    /* 隱藏右上角漢堡選單、頂部彩條、底部 Footer */
-    #MainMenu { visibility: hidden !important; }
-    header { visibility: hidden !important; }
+    div[data-testid="stStatusWidget"] { display: none !important; }
+    div[class*="viewerBadge"] { display: none !important; }
     footer { visibility: hidden !important; }
-    [data-testid="stStatusWidget"] { visibility: hidden !important; }
     
     /* ====================================================================
-       2. 【RWD 自適應字體】依據螢幕寬度自動調整大小
+       3. RWD 究極自適應
        ==================================================================== */
     
-    /* 預設 (手機或小視窗): 字體適中，不會爆版 */
-    html, body, [class*="css"] {
-        font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
-        font-size: 18px !important; 
-        font-weight: bold !important;
-    }
-    h1 { font-size: 36px !important; }
-    h2 { font-size: 28px !important; }
-    h3 { font-size: 24px !important; }
-    .stMetricValue { font-size: 40px !important; }
-
-    /* 平板/筆電 (寬度 > 768px): 字體稍微放大 */
-    @media (min-width: 768px) {
+    /* --- 手機/平板 (<= 768px) --- */
+    @media only screen and (max-width: 768px) {
         html, body, [class*="css"] {
-            font-size: 22px !important; 
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
+            font-size: 16px !important; 
+            font-weight: bold !important;
         }
-        h1 { font-size: 48px !important; }
-        h2 { font-size: 36px !important; }
-        h3 { font-size: 30px !important; }
-        .stMetricValue { font-size: 50px !important; }
+        h1 { font-size: 32px !important; margin-bottom: 15px !important; }
+        h2 { font-size: 26px !important; margin-top: 20px !important; }
+        h3 { font-size: 22px !important; }
         
-        /* 表格字體 */
-        div[data-testid="stDataFrame"] div[data-testid="stTable"], 
+        .stMetricValue { font-size: 40px !important; }
+        .stMetricLabel { font-size: 18px !important; }
+        
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stTextInput div[data-baseweb="input"] > div {
+            min-height: 45px !important;
+        }
+        
         div[data-testid="stDataFrame"] td, 
         div[data-testid="stDataFrame"] th {
-            font-size: 22px !important;
+            font-size: 14px !important;
+            padding: 5px !important;
         }
+        .modebar { display: none !important; }
+        section[data-testid="stSidebar"] { font-size: 16px !important; }
     }
 
-    /* 大型桌機/大螢幕 (寬度 > 1200px): 字體加大 (你的老花眼模式) */
-    @media (min-width: 1200px) {
+    /* --- 電腦 ( > 768px) --- */
+    @media only screen and (min-width: 769px) {
         html, body, [class*="css"] {
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
             font-size: 28px !important; 
+            font-weight: bold !important;
         }
-        h1 { font-size: 60px !important; }
-        h2 { font-size: 48px !important; }
+        h1 { font-size: 60px !important; margin-bottom: 25px !important; }
+        h2 { font-size: 48px !important; margin-top: 35px !important; }
         h3 { font-size: 36px !important; }
-        .stMetricValue { font-size: 64px !important; }
         
-        /* 表格字體特大 */
-        div[data-testid="stDataFrame"] div[data-testid="stTable"], 
+        .stMetricValue { font-size: 70px !important; font-weight: 900 !important; }
+        
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stTextInput div[data-baseweb="input"] > div {
+            min-height: 65px !important;
+        }
+        .stSelectbox div[data-baseweb="select"] span {
+            font-size: 30px !important;
+        }
+        
         div[data-testid="stDataFrame"] td, 
         div[data-testid="stDataFrame"] th {
             font-size: 28px !important;
             padding: 12px !important;
         }
-        
-        /* 輸入框高度撐開 */
-        .stSelectbox div[data-baseweb="select"] > div,
-        .stTextInput div[data-baseweb="input"] > div {
-            min-height: 60px !important;
-        }
     }
 
-    /* ====================================================================
-       3. 通用元件優化
-       ==================================================================== */
-    .modebar { display: none !important; }
+    div[data-testid="stDataFrame"] td { text-align: right !important; }
     
-    /* 輸入框通用設定 */
-    .stSelectbox div[data-baseweb="select"] > div,
-    .stTextInput div[data-baseweb="input"] > div,
-    .stNumberInput div[data-baseweb="input"] > div {
-        display: flex !important;
-        align-items: center !important;
-    }
-    
-    /* 自訂大字體數據卡片 (也會隨 RWD 縮放) */
     .big-metric-box {
         background-color: #f8f9fa;
-        border-left: 10px solid #DC3545;
+        border-left: 12px solid #DC3545;
         padding: 20px;
         margin: 15px 0;
         border-radius: 12px;
@@ -131,8 +127,14 @@ DAILY_SNAPSHOT = "daily_snapshot.csv"
 def clean_broker_name(name):
     if pd.isna(name): return "未知"
     name = str(name)
+    
+    # 【V108 修復】先移除亂碼 ? 和 ？
+    name = name.replace('?', '').replace('？', '')
+    
+    # 移除開頭的數字代碼 (如 9200)
     cleaned = re.sub(r'^[A-Za-z0-9]+\s*', '', name)
     cleaned = re.sub(r'^\d+', '', cleaned)
+    
     return cleaned.strip()
 
 def parse_date_input(date_str, default_date):
@@ -212,6 +214,7 @@ def process_csv_content(df_raw, date_obj):
         df_detail = pd.concat([df_L, df_R], ignore_index=True)
         
         df_detail.dropna(subset=['Broker'], inplace=True)
+        # 這裡也要清洗
         df_detail['Broker'] = df_detail['Broker'].apply(clean_broker_name)
         for col in ['Price', 'Buy', 'Sell']: df_detail[col] = pd.to_numeric(df_detail[col], errors='coerce').fillna(0)
         
@@ -306,22 +309,22 @@ def plot_bar_chart(data, x_col, y_col, title, color_code, avg_col=None):
     if avg_col and avg_col in data.columns:
          data['Label'] = data['Label'] + " ($" + data[avg_col].round(1).astype(str) + ")"
 
-    fig = px.bar(data, x=x_col, y=y_col, orientation='h', text='Label', title=title)
+    fig = px.bar(data, x=x_col, y=y_col, orientation='h', text='Label', title=title,
+                 labels={x_col: "淨買賣(張)", y_col: "券商"})
     
-    # 圖表字體大小設定 (這裡我們給一個相對大的預設值，讓它在大螢幕清楚，手機上 Plotly 會自動縮放一些)
     fig.update_layout(
-        yaxis={'categoryorder':'total ascending', 'title':None, 'tickfont':{'size':20, 'color':'black', 'family': 'Microsoft JhengHei'}}, 
+        yaxis={'categoryorder':'total ascending', 'title':None, 'tickfont':{'size':18, 'color':'black', 'family': 'Microsoft JhengHei'}}, 
         xaxis={'title':"", 'showticklabels': False}, 
-        margin=dict(r=150, l=120, t=80, b=50), 
-        height=850, 
-        title_font=dict(size=30, family="Microsoft JhengHei", color='black'),
-        hoverlabel=dict(font_size=24, font_family="Microsoft JhengHei", bgcolor="white") 
+        margin=dict(r=80, l=100, t=60, b=40), 
+        height=800, 
+        title_font=dict(size=26, family="Microsoft JhengHei", color='black'),
+        hoverlabel=dict(font_size=18, font_family="Microsoft JhengHei", bgcolor="white") 
     )
     
     fig.update_traces(
         marker_color=color_code, 
         textposition='outside', 
-        textfont=dict(size=24, color='black', family="Arial Black"), 
+        textfont=dict(size=20, color='black', family="Arial Black"), 
         cliponaxis=False, 
         hovertemplate="<b>%{y}</b><br>數據: %{x:.1f}<extra></extra>"
     )
@@ -372,7 +375,6 @@ def view_dashboard():
     
     user_price = st.number_input("請輸入今日收盤價", value=100.0)
 
-    # 數據卡片顯示
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
         color = "#28A745" if power_score > 60 else ("#DC3545" if power_score < 40 else "#FFC107")
@@ -441,7 +443,6 @@ def view_dashboard():
 
     st.markdown("---")
     cc1, cc2 = st.columns(2)
-    # Top 20 邏輯
     N_TOP = 20
     
     with cc1:
@@ -546,7 +547,21 @@ def view_chip_structure():
     st.subheader("🗺️ 動態沃羅諾伊戰場")
     v_opt = st.radio("範圍", ["當日", "近 5 日", "近 10 日", "自訂"], horizontal=True)
     
-    if v_opt == "當日": target_v = df_hist[df_hist['Date'] == dates[-1]].copy()
+    # 【V108 修復】自訂日期邏輯
+    if v_opt == "當日": 
+        target_v = df_hist[df_hist['Date'] == dates[-1]].copy()
+    elif v_opt == "自訂":
+        c1, c2 = st.columns(2)
+        # 防止日期為空導致報錯
+        start_def = dates[0] if len(dates)>0 else date.today()
+        end_def = dates[-1] if len(dates)>0 else date.today()
+        
+        d_s = c1.date_input("開始", start_def)
+        d_e = c2.date_input("結束", end_def)
+        
+        mask = (df_hist['Date'] >= d_s) & (df_hist['Date'] <= d_e)
+        subset = df_hist.loc[mask]
+        target_v = subset.groupby('Broker')[['Net']].sum().reset_index()
     else:
         sel_dates = dates[-5:] if v_opt == "近 5 日" else dates[-10:]
         subset = df_hist[df_hist['Date'].isin(sel_dates)]
@@ -558,7 +573,6 @@ def view_chip_structure():
         target_v['Net_Zhang'] = target_v['Net'] / 1000
         target_v['Tier'] = target_v['Net'].apply(get_tier)
         
-        # 視覺權重平衡：放大中實戶
         def weight_boost(row):
             if "超級大戶" in row['Tier']: return row['AbsNet'] * 1.0  
             if "大戶" in row['Tier']: return row['AbsNet'] * 1.0      
@@ -569,9 +583,11 @@ def view_chip_structure():
 
         custom_scale = [[0.0, 'green'], [0.5, 'white'], [1.0, 'red']]
         max_val = max(abs(target_v['Net_Zhang'].min()), abs(target_v['Net_Zhang'].max()))
+        
         fig_v = px.treemap(target_v, path=[px.Constant("全市場"), 'Tier', 'Broker'], values='W_Size',
                            color='Net_Zhang', color_continuous_scale=custom_scale, range_color=[-max_val, max_val],
-                           title=f"{v_opt} 主力領土 (加權平衡顯示)")
+                           title=f"{v_opt} 主力領土 (加權平衡顯示)",
+                           labels={'Net_Zhang': '淨買賣(張)'})
         
         fig_v.update_traces(textfont=dict(size=24), hovertemplate='<b>%{label}</b><br>淨量: %{color:.1f} 張')
         fig_v.update_layout(hoverlabel=dict(font_size=24, font_family="Microsoft JhengHei", bgcolor="white"))
@@ -638,7 +654,8 @@ def view_hunter_radar():
         
         fig_g = px.bar(gang_stats, x='Net_Zhang', y='Gang', orientation='h', text_auto='.1f', 
                        title="幫派淨買賣", color='Net_Zhang', color_continuous_scale='RdYlGn', 
-                       custom_data=['Info']) 
+                       custom_data=['Info'],
+                       labels={'Net_Zhang': '淨買賣(張)', 'Gang': '幫派分類'}) 
         
         fig_g.update_traces(
             textfont=dict(size=24),
@@ -866,8 +883,8 @@ def view_batch_import():
 # ============================================
 def main():
     with st.sidebar:
-        st.title("🦅 Phoenix V104")
-        st.caption("隱形自適應版")
+        st.title("🦅 Phoenix V108")
+        st.caption("除錯淨化版")
         st.markdown("---")
         choice = st.radio("功能選單", ["🏠 總司令儀表板", "🧠 AI 戰略實驗室", "📈 趨勢戰情室", "🔍 獵殺雷達", "📉 籌碼斷層", "🕵️‍♂️ 分點偵探", "🏆 贏家與韭菜名人堂", "📂 資料管理後台"])
     
