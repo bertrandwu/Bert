@@ -11,10 +11,10 @@ from scipy.stats import linregress
 import time
 
 # ============================================
-# 0. 系統設定 & CSS (V108: 繼承 V107 的完美 RWD 與隱私)
+# 0. 系統設定 & CSS (V109: 手機原廠模式 + 電腦霸氣模式)
 # ============================================
 st.set_page_config(
-    page_title="Phoenix V108 除錯淨化版",
+    page_title="Phoenix V109 行動急救版",
     page_icon="🦅",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -23,95 +23,104 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* ====================================================================
-       1. 手機導航按鈕修復 (保留左上角，隱藏右上角)
-       ==================================================================== */
-    div[data-testid="stToolbar"] { 
-        visibility: hidden !important; 
-        display: none !important;
-    }
-    div[data-testid="stDecoration"] { 
-        visibility: hidden !important; 
-        display: none !important;
-    }
-
-    /* ====================================================================
-       2. 絕對隱私 (隱藏 Viewer Badge)
+       1. 基礎隱私設定 (隱藏右下角頭像) - 這是唯一全域通用的
        ==================================================================== */
     .viewerBadge_container__1QSob { display: none !important; }
-    div[data-testid="stStatusWidget"] { display: none !important; }
     div[class*="viewerBadge"] { display: none !important; }
+    div[data-testid="stStatusWidget"] { display: none !important; }
     footer { visibility: hidden !important; }
     
-    /* ====================================================================
-       3. RWD 究極自適應
-       ==================================================================== */
-    
-    /* --- 手機/平板 (<= 768px) --- */
-    @media only screen and (max-width: 768px) {
-        html, body, [class*="css"] {
-            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
-            font-size: 16px !important; 
-            font-weight: bold !important;
-        }
-        h1 { font-size: 32px !important; margin-bottom: 15px !important; }
-        h2 { font-size: 26px !important; margin-top: 20px !important; }
-        h3 { font-size: 22px !important; }
-        
-        .stMetricValue { font-size: 40px !important; }
-        .stMetricLabel { font-size: 18px !important; }
-        
-        .stSelectbox div[data-baseweb="select"] > div,
-        .stTextInput div[data-baseweb="input"] > div {
-            min-height: 45px !important;
-        }
-        
-        div[data-testid="stDataFrame"] td, 
-        div[data-testid="stDataFrame"] th {
-            font-size: 14px !important;
-            padding: 5px !important;
-        }
-        .modebar { display: none !important; }
-        section[data-testid="stSidebar"] { font-size: 16px !important; }
-    }
+    /* 隱藏頂部彩條，但保留 Header 以便手機導航 */
+    div[data-testid="stDecoration"] { display: none !important; }
 
-    /* --- 電腦 ( > 768px) --- */
+    /* ====================================================================
+       2. 電腦版專用設定 (螢幕寬度 > 768px) -> 只有電腦會變大
+       ==================================================================== */
     @media only screen and (min-width: 769px) {
+        /* 全域大字體 */
         html, body, [class*="css"] {
             font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
             font-size: 28px !important; 
             font-weight: bold !important;
         }
+        
+        /* 標題超大 */
         h1 { font-size: 60px !important; margin-bottom: 25px !important; }
         h2 { font-size: 48px !important; margin-top: 35px !important; }
         h3 { font-size: 36px !important; }
         
+        /* 數據指標超大 */
         .stMetricValue { font-size: 70px !important; font-weight: 900 !important; }
+        .stMetricLabel { font-size: 30px !important; }
         
+        /* 輸入框高度撐開 (方便滑鼠點) */
         .stSelectbox div[data-baseweb="select"] > div,
-        .stTextInput div[data-baseweb="input"] > div {
+        .stTextInput div[data-baseweb="input"] > div,
+        .stNumberInput div[data-baseweb="input"] > div {
             min-height: 65px !important;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
         }
+        
+        /* 下拉選單文字 */
         .stSelectbox div[data-baseweb="select"] span {
             font-size: 30px !important;
         }
         
+        /* 表格寬鬆排版 */
         div[data-testid="stDataFrame"] td, 
         div[data-testid="stDataFrame"] th {
             font-size: 28px !important;
             padding: 12px !important;
         }
+        
+        /* 隱藏 Plotly 工具列 (電腦版不需要) */
+        .modebar { display: none !important; }
     }
 
-    div[data-testid="stDataFrame"] td { text-align: right !important; }
-    
+    /* ====================================================================
+       3. 手機版專用設定 (螢幕寬度 <= 768px) -> 回歸原廠，確保可用性
+       ==================================================================== */
+    @media only screen and (max-width: 768px) {
+        /* 字體回歸正常大小，避免擠壓 */
+        html, body, [class*="css"] {
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif !important;
+            font-size: 16px !important; 
+        }
+        
+        /* 標題適中 */
+        h1 { font-size: 28px !important; }
+        h2 { font-size: 24px !important; }
+        h3 { font-size: 20px !important; }
+        
+        /* 數據指標適中 */
+        .stMetricValue { font-size: 36px !important; font-weight: bold !important; }
+        
+        /* 確保 Header 可見，這樣漢堡選單才會出現！ */
+        header { visibility: visible !important; display: block !important; }
+        
+        /* 輸入框維持預設高度，不要強制撐開，不然會擋住畫面 */
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stTextInput div[data-baseweb="input"] > div {
+            min-height: auto !important;
+        }
+        
+        /* 表格縮小，允許橫向捲動 */
+        div[data-testid="stDataFrame"] { width: 100% !important; overflow-x: auto !important; }
+    }
+
+    /* 通用：數據卡片 */
     .big-metric-box {
         background-color: #f8f9fa;
-        border-left: 12px solid #DC3545;
-        padding: 20px;
-        margin: 15px 0;
-        border-radius: 12px;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
+        border-left: 10px solid #DC3545;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
+    
+    /* 表格數字靠右 */
+    div[data-testid="stDataFrame"] td { text-align: right !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -127,14 +136,9 @@ DAILY_SNAPSHOT = "daily_snapshot.csv"
 def clean_broker_name(name):
     if pd.isna(name): return "未知"
     name = str(name)
-    
-    # 【V108 修復】先移除亂碼 ? 和 ？
     name = name.replace('?', '').replace('？', '')
-    
-    # 移除開頭的數字代碼 (如 9200)
     cleaned = re.sub(r'^[A-Za-z0-9]+\s*', '', name)
     cleaned = re.sub(r'^\d+', '', cleaned)
-    
     return cleaned.strip()
 
 def parse_date_input(date_str, default_date):
@@ -214,7 +218,6 @@ def process_csv_content(df_raw, date_obj):
         df_detail = pd.concat([df_L, df_R], ignore_index=True)
         
         df_detail.dropna(subset=['Broker'], inplace=True)
-        # 這裡也要清洗
         df_detail['Broker'] = df_detail['Broker'].apply(clean_broker_name)
         for col in ['Price', 'Buy', 'Sell']: df_detail[col] = pd.to_numeric(df_detail[col], errors='coerce').fillna(0)
         
@@ -312,19 +315,19 @@ def plot_bar_chart(data, x_col, y_col, title, color_code, avg_col=None):
     fig = px.bar(data, x=x_col, y=y_col, orientation='h', text='Label', title=title,
                  labels={x_col: "淨買賣(張)", y_col: "券商"})
     
+    # 圖表字體與配置 (電腦版維持較大，手機版會自動縮放，但 Margin 給予彈性)
     fig.update_layout(
-        yaxis={'categoryorder':'total ascending', 'title':None, 'tickfont':{'size':18, 'color':'black', 'family': 'Microsoft JhengHei'}}, 
+        yaxis={'categoryorder':'total ascending', 'title':None}, 
         xaxis={'title':"", 'showticklabels': False}, 
-        margin=dict(r=80, l=100, t=60, b=40), 
+        margin=dict(r=80, l=100, t=60, b=40),
         height=800, 
-        title_font=dict(size=26, family="Microsoft JhengHei", color='black'),
-        hoverlabel=dict(font_size=18, font_family="Microsoft JhengHei", bgcolor="white") 
+        hoverlabel=dict(bgcolor="white") 
     )
+    # 不強制設定 tickfont size，讓它自動適應；若為電腦版 CSS 會強制覆蓋
     
     fig.update_traces(
         marker_color=color_code, 
         textposition='outside', 
-        textfont=dict(size=20, color='black', family="Arial Black"), 
         cliponaxis=False, 
         hovertemplate="<b>%{y}</b><br>數據: %{x:.1f}<extra></extra>"
     )
@@ -375,6 +378,7 @@ def view_dashboard():
     
     user_price = st.number_input("請輸入今日收盤價", value=100.0)
 
+    # 數據卡片顯示
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
         color = "#28A745" if power_score > 60 else ("#DC3545" if power_score < 40 else "#FFC107")
@@ -547,18 +551,14 @@ def view_chip_structure():
     st.subheader("🗺️ 動態沃羅諾伊戰場")
     v_opt = st.radio("範圍", ["當日", "近 5 日", "近 10 日", "自訂"], horizontal=True)
     
-    # 【V108 修復】自訂日期邏輯
     if v_opt == "當日": 
         target_v = df_hist[df_hist['Date'] == dates[-1]].copy()
     elif v_opt == "自訂":
         c1, c2 = st.columns(2)
-        # 防止日期為空導致報錯
         start_def = dates[0] if len(dates)>0 else date.today()
         end_def = dates[-1] if len(dates)>0 else date.today()
-        
         d_s = c1.date_input("開始", start_def)
         d_e = c2.date_input("結束", end_def)
-        
         mask = (df_hist['Date'] >= d_s) & (df_hist['Date'] <= d_e)
         subset = df_hist.loc[mask]
         target_v = subset.groupby('Broker')[['Net']].sum().reset_index()
@@ -883,8 +883,8 @@ def view_batch_import():
 # ============================================
 def main():
     with st.sidebar:
-        st.title("🦅 Phoenix V108")
-        st.caption("除錯淨化版")
+        st.title("🦅 Phoenix V109")
+        st.caption("行動急救版")
         st.markdown("---")
         choice = st.radio("功能選單", ["🏠 總司令儀表板", "🧠 AI 戰略實驗室", "📈 趨勢戰情室", "🔍 獵殺雷達", "📉 籌碼斷層", "🕵️‍♂️ 分點偵探", "🏆 贏家與韭菜名人堂", "📂 資料管理後台"])
     
